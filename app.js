@@ -1,13 +1,10 @@
 const express = require('express');
 const pdf = require('html-pdf');
-const fs = require('fs');
 const bodyParser= require('body-parser')
 const app = express()
-const cors = require('cors');
 
 app.use(bodyParser());
 
-app.use(cors());
 
 app.get('/', (req, res) => {
     res.send('hello');
@@ -17,11 +14,10 @@ app.get('/', (req, res) => {
 app.post('/document/pdf', (req, res) => {
    
     const html = req.body.html;
-    console.log(" fdfdfdferror");
-    var options = { format: 'Letter' };
-    
+    var options = { format: 'A4' };
 
-    pdf.create(html).toStream(function(err, stream) {
+
+    pdf.create(html, options).toStream(function(err, stream) {
         if (err) {
             res.send(404);
         } else {
