@@ -1,38 +1,43 @@
+require('dotenv').config();
+
 const express = require('express');
 const pdf = require('html-pdf');
-const bodyParser= require('body-parser')
-const app = express()
+const app = express();
 
-app.use(bodyParser());
-
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
-    res.send('hello');
+  res.json({ message: 'Updials Document Service.' });
 });
-
 
 app.post('/document/pdf', (req, res) => {
-   
-    const html = req.body.html;
-    var options = { format: 'A4' };
+  // TODO: Sanitize incoming html, fileName
+  // This is potential security issue
 
+  const { html, fileName } = req.body;
+  var options = {
+    format: 'A4',
+    phantomArgs: ['--local-url-access=false'],
+  };
 
-    pdf.create(html, options).toStream(function(err, stream) {
-        if (err) {
-            res.send(404);
-        } else {
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'attachment; filename=test-file.pdf;');
+  pdf.create(html, options).toStream(function (err, stream) {
+    if (err) {
+      res.send(404);
+    } else {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename=${fileName}.pdf;`
+      );
 
-            stream.pipe(res);
-
-          
-        }
-    });
-
+      stream.pipe(res);
+    }
+  });
 });
 
+const port = process.env.PORT || 3000;
 
-app.listen(8000, () => {
-    console.log("Server is listening on port 8000");
+app.listen(port, () => {
+  console.log('Server is listening on port ' + port);
 });
